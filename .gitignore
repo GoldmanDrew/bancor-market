@@ -1,0 +1,14 @@
+# Cached gradle artifacts
+.gradle/
+
+# IntelliJ artifacts
+.idea/
+
+# Build artifacts
+build/
+
+# MySQL credentials
+src/main/resources/credentials.properties
+
+# Lombok config created by plugin
+lombok.config
