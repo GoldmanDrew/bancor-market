@@ -18,5 +18,6 @@ public class MarketController {
 
     public void executeAllOrders() {
         List<Order> orders = dataFetcher.retrieveAllOrders();
+        System.out.println(orders.get(0).getUser());
     }
 }

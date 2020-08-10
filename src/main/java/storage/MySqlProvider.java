@@ -14,7 +14,7 @@ public class MySqlProvider {
      * @return Connection to the vase MySQL database
      */
     public static Connection getConnection() {
-        String url = "jdbc:mysql://localhost:3306/vase?serverTimezone=EST";
+        String url = "jdbc:mysql://localhost:3306/vase2?serverTimezone=EST";
 
         Properties credentialProperties = readCredentials("credentials.properties");
         String user = credentialProperties.getProperty("user");
