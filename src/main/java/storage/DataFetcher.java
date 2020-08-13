@@ -75,8 +75,8 @@ public class DataFetcher {
             return new Order(
                     resultSet.getInt("OrderID"),
                     resultSet.getString("User"),
-                    resultSet.getString("SellToken"),
-                    resultSet.getString("BuyToken"),
+                    resultSet.getString("SourceToken"),
+                    resultSet.getString("TargetToken"),
                     resultSet.getDouble("Quantity")
             );
         } catch (SQLException e) {

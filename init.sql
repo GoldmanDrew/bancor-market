@@ -12,11 +12,11 @@ CREATE TABLE tokens (
 CREATE TABLE orders (
 	OrderID int AUTO_INCREMENT, 
 	User varchar(255), 
-	SellToken varchar(255), 
-	BuyToken varchar(255), 
+	SourceToken varchar(255), 
+	TargetToken varchar(255), 
 	Quantity DOUBLE,
 	Filled varchar(1) NOT NULL,
 	PRIMARY KEY (OrderID),
-	FOREIGN KEY (SellToken) REFERENCES tokens(Name),	
-	FOREIGN KEY (BuyToken) REFERENCES tokens(Name)
+	FOREIGN KEY (SourceToken) REFERENCES tokens(Name),	
+	FOREIGN KEY (TargetToken) REFERENCES tokens(Name)
 );

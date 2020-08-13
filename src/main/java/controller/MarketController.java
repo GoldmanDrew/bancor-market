@@ -28,7 +28,7 @@ public class MarketController {
         List<Order> orders = dataFetcher.retrieveAllOrders();
 
         for (Order order : orders) {
-            double tokensIssued = pricer.exchangeTokens(order.getFromToken(), order.getToToken(), order.getQuantity());
+            double tokensIssued = pricer.exchangeTokens(order.getSourceToken(), order.getTargetToken(), order.getQuantity());
             // Round to two decimals
             tokensIssued = Math.round(tokensIssued * 100.0) / 100.0;
 
@@ -43,7 +43,7 @@ public class MarketController {
         dataUpdater.updateTokenSupplies(updateTokenSupplies());
     }
 
-    public Map<String, Double> updateTokenSupplies() {
+    private Map<String, Double> updateTokenSupplies() {
         Map<String, Double> tokenSupplies = pricer.getTokenSupplyMap();
         for (String token : tokenSupplyChangeMap.keySet()) {
             tokenSupplies.put(token, tokenSupplies.get(token) + tokenSupplyChangeMap.get(token));
@@ -54,13 +54,13 @@ public class MarketController {
 
     private void updateTokenSupplyMap(Order order, double sourceTokenAmount, double targetTokenAmount) {
         tokenSupplyChangeMap.put(
-                order.getFromToken(),
-                tokenSupplyChangeMap.getOrDefault(order.getFromToken(), 0.0) - sourceTokenAmount
+                order.getSourceToken(),
+                tokenSupplyChangeMap.getOrDefault(order.getSourceToken(), 0.0) - sourceTokenAmount
         );
 
         tokenSupplyChangeMap.put(
-                order.getToToken(),
-                tokenSupplyChangeMap.getOrDefault(order.getFromToken(), 0.0) + targetTokenAmount
+                order.getTargetToken(),
+                tokenSupplyChangeMap.getOrDefault(order.getTargetToken(), 0.0) + targetTokenAmount
         );
     }
 }

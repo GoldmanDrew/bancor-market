@@ -24,6 +24,10 @@ public class DataUpdater {
 
     public void updateTokenSupplies(Map<String, Double> tokenSupplies) {
         for (String token : tokenSupplies.keySet()) {
+            if (token.equals("connector")) {
+                continue;
+            }
+
             String updateTokenSupplyQuery = "UPDATE tokens SET Supply=" + tokenSupplies.get(token) +
                     " WHERE Name='" + token + "'";
 
