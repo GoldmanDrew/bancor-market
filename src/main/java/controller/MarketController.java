@@ -40,7 +40,7 @@ public class MarketController {
         }
 
         dataUpdater.updateFilledOrders(lastOrderIdExecuted);
-        dataUpdater.updateTokenSupplies(updateTokenSupplies());
+        dataUpdater.updateTokenSuppliesAndPrices(updateTokenSupplies());
     }
 
     private Map<String, Double> updateTokenSupplies() {

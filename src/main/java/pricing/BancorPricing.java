@@ -59,19 +59,9 @@ public class BancorPricing {
         }
     }
 
-    public Map<String, Double> calculatePrices() {
+    public double calculatePrice(String token) {
 
-        Map<String, Double> tokenPriceMap = new HashMap<>();
-
-        for (String tokenName : tokenSupplyMap.keySet()) {
-            if (!tokenName.equals(CONNECTOR_TOKEN_NAME)) {
-                tokenPriceMap.put(
-                        tokenName,
-                        calculatePrice(tokenSupplyMap.get(CONNECTOR_TOKEN_NAME) + GHOST_SUPPLY,
-                        tokenSupplyMap.get(tokenName) + GHOST_SUPPLY, CONNECTOR_WEIGHT));
-            }
-        }
-
-        return tokenPriceMap;
+        return calculatePrice(tokenSupplyMap.get(CONNECTOR_TOKEN_NAME) + GHOST_SUPPLY,
+                        tokenSupplyMap.get(token) + GHOST_SUPPLY, CONNECTOR_WEIGHT);
     }
 }
