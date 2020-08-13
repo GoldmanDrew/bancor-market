@@ -1,10 +1,13 @@
 package pricing;
 
+import lombok.Getter;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class BancorPricing {
 
+    @Getter
     private Map<String, Double> tokenSupplyMap;
     private final String CONNECTOR_TOKEN_NAME = "connector";
     private final double CONNECTOR_WEIGHT = .5;

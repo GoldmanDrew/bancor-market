@@ -50,7 +50,7 @@ public class DataFetcher {
     public List<Order> retrieveAllOrders() {
         try {
             Statement statement = connection.createStatement();
-            String allOrdersQuery = "SELECT * from orders";
+            String allOrdersQuery = "SELECT * from orders WHERE Filled='N'";
             ResultSet resultSet = statement.executeQuery(allOrdersQuery);
 
             List<Order> orders = new ArrayList<>();
@@ -73,6 +73,7 @@ public class DataFetcher {
     private static Order parseQueryIntoOrder(ResultSet resultSet) {
         try {
             return new Order(
+                    resultSet.getInt("OrderID"),
                     resultSet.getString("User"),
                     resultSet.getString("SellToken"),
                     resultSet.getString("BuyToken"),

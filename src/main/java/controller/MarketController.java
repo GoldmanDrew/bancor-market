@@ -3,19 +3,25 @@ package controller;
 import order.Order;
 import pricing.BancorPricing;
 import storage.DataFetcher;
+import storage.DataUpdater;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class MarketController {
 
     private DataFetcher dataFetcher;
+    private DataUpdater dataUpdater;
     private BancorPricing pricer;
     private Map<String, Double> tokenSupplyChangeMap;
+    private Integer lastOrderIdExecuted = -1;
 
-    public MarketController(DataFetcher dataFetcher, BancorPricing pricer) {
+    public MarketController(DataFetcher dataFetcher, DataUpdater dataUpdater, BancorPricing pricer) {
         this.dataFetcher = dataFetcher;
+        this.dataUpdater = dataUpdater;
         this.pricer = pricer;
+        this.tokenSupplyChangeMap = new HashMap<>();
     }
 
     public void executeAllOrders() {
@@ -23,19 +29,38 @@ public class MarketController {
 
         for (Order order : orders) {
             double tokensIssued = pricer.exchangeTokens(order.getFromToken(), order.getToToken(), order.getQuantity());
-
             // Round to two decimals
             tokensIssued = Math.round(tokensIssued * 100.0) / 100.0;
 
-            System.out.println(order.getQuantity() + " tokens of " + order.getFromToken() + " were exchanged for " +
-                tokensIssued + " tokens of " + order.getToToken());
-            // Update user data
-            // Update token info
+            updateTokenSupplyMap(order, order.getQuantity(), tokensIssued);
+
+            if (order.getOrderId() > lastOrderIdExecuted) {
+                lastOrderIdExecuted = order.getOrderId();
+            }
         }
 
-        Map<String, Double> prices = pricer.calculatePrices();
-        for (String key : prices.keySet()) {
-            System.out.println("The price of " + key + " is " + prices.get(key));
+        dataUpdater.updateFilledOrders(lastOrderIdExecuted);
+        dataUpdater.updateTokenSupplies(updateTokenSupplies());
+    }
+
+    public Map<String, Double> updateTokenSupplies() {
+        Map<String, Double> tokenSupplies = pricer.getTokenSupplyMap();
+        for (String token : tokenSupplyChangeMap.keySet()) {
+            tokenSupplies.put(token, tokenSupplies.get(token) + tokenSupplyChangeMap.get(token));
         }
+
+        return tokenSupplies;
+    }
+
+    private void updateTokenSupplyMap(Order order, double sourceTokenAmount, double targetTokenAmount) {
+        tokenSupplyChangeMap.put(
+                order.getFromToken(),
+                tokenSupplyChangeMap.getOrDefault(order.getFromToken(), 0.0) - sourceTokenAmount
+        );
+
+        tokenSupplyChangeMap.put(
+                order.getToToken(),
+                tokenSupplyChangeMap.getOrDefault(order.getFromToken(), 0.0) + targetTokenAmount
+        );
     }
 }

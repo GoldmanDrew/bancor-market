@@ -5,6 +5,7 @@ import lombok.Getter;
 @Getter
 public class Order {
 
+    private Integer orderId;
     private String user;
     private String fromToken;
     private String toToken;
@@ -17,7 +18,8 @@ public class Order {
      * @param toToken - The token the user is buying
      * @param quantity - The number of fromTokens to sell
      */
-    public Order(String user, String fromToken, String toToken, double quantity) {
+    public Order(Integer orderId, String user, String fromToken, String toToken, double quantity) {
+        this.orderId = orderId;
         this.user = user;
         this.fromToken = fromToken;
         this.toToken = toToken;

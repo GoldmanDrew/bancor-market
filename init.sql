@@ -15,6 +15,7 @@ CREATE TABLE orders (
 	SellToken varchar(255), 
 	BuyToken varchar(255), 
 	Quantity DOUBLE,
+	Filled varchar(1) NOT NULL,
 	PRIMARY KEY (OrderID),
 	FOREIGN KEY (SellToken) REFERENCES tokens(Name),	
 	FOREIGN KEY (BuyToken) REFERENCES tokens(Name)
