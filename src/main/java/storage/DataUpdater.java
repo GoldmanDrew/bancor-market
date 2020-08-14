@@ -1,5 +1,6 @@
 package storage;
 
+import order.Order;
 import pricing.BancorPricing;
 
 import java.sql.Connection;
@@ -46,6 +47,22 @@ public class DataUpdater {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void updateUserShares(Order order, Double targetTokensIssued) {
+        String updateSourceTokenQuery = String.format("UPDATE UserShares SET Quantity=Quantity - %f WHERE User='%s' AND Token='%s'",
+                order.getQuantity(), order.getUser(), order.getSourceToken());
+
+        String updateTargetTokenQuery = String.format("INSERT INTO UserShares (User, Token, Quantity) VALUES ('%s', '%s', '%f') " +
+                "ON DUPLICATE KEY UPDATE Quantity=Quantity + %f", order.getUser(), order.getTargetToken(), targetTokensIssued, targetTokensIssued);
+
+        try {
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(updateSourceTokenQuery);
+            statement.executeUpdate(updateTargetTokenQuery);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

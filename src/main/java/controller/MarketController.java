@@ -37,6 +37,8 @@ public class MarketController {
             if (order.getOrderId() > lastOrderIdExecuted) {
                 lastOrderIdExecuted = order.getOrderId();
             }
+
+            dataUpdater.updateUserShares(order, tokensIssued);
         }
 
         dataUpdater.updateFilledOrders(lastOrderIdExecuted);

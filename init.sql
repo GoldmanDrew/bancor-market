@@ -9,6 +9,14 @@ CREATE TABLE tokens (
 	Price DOUBLE
 );
 
+CREATE TABLE UserShares (
+	User varchar(255),
+	Token varchar(255),
+	Quantity DOUBLE, 
+	PRIMARY KEY (User, Token),
+	FOREIGN KEY (TOKEN) REFERENCES tokens(Name)
+);
+
 CREATE TABLE orders (
 	OrderID int AUTO_INCREMENT, 
 	User varchar(255), 
