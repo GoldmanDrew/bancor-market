@@ -10,10 +10,12 @@ CREATE TABLE tokens (
 );
 
 CREATE TABLE UserShares (
+	ID int AUTO_INCREMENT,
 	User varchar(255),
 	Token varchar(255),
 	Quantity DOUBLE, 
-	PRIMARY KEY (User, Token),
+	PRIMARY KEY (ID), 
+	UNIQUE (User, Token),
 	FOREIGN KEY (TOKEN) REFERENCES tokens(Name)
 );
 
