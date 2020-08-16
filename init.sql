@@ -5,7 +5,8 @@ USE vase2;
 CREATE TABLE tokens (
 	Name varchar(255) PRIMARY KEY,
 	Ticker varchar(4), 
-	Supply DOUBLE, 
+	TokenSupply DOUBLE, 
+	CashSupply DOUBLE,
 	Price DOUBLE
 );
 
@@ -30,3 +31,7 @@ CREATE TABLE orders (
 	FOREIGN KEY (SourceToken) REFERENCES tokens(Name),	
 	FOREIGN KEY (TargetToken) REFERENCES tokens(Name)
 );
+
+INSERT INTO tokens (Name, Ticker, Price) VALUES ("Cash", "Cash", 1.0);
+INSERT INTO tokens (Name, Ticker, TokenSupply, CashSupply) VALUES ("A", "A", 100.0, 100.0);
+INSERT INTO tokens (Name, Ticker, TokenSupply, CashSupply) VALUES ("B", "B", 100.0, 100.0);

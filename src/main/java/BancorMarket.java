@@ -11,7 +11,7 @@ public class BancorMarket {
         Connection connection = MySqlProvider.getConnection();
         DataFetcher dataFetcher = new DataFetcher(connection);
         DataUpdater dataUpdater = new DataUpdater(connection);
-        BancorPricing pricer = new BancorPricing(dataFetcher.retrieveTokenSupplies());
+        BancorPricing pricer = new BancorPricing(dataFetcher.retrieveTokens());
 
         MarketController controller = new MarketController(dataFetcher, dataUpdater, pricer);
         controller.executeAllOrders();

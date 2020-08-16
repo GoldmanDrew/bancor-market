@@ -1,6 +1,7 @@
 package storage;
 
-import order.Order;
+import data.Order;
+import data.Token;
 import pricing.BancorPricing;
 
 import java.sql.Connection;
@@ -25,16 +26,19 @@ public class DataUpdater {
         }
     }
 
-    public void updateTokenSuppliesAndPrices(Map<String, Double> tokenSupplies) {
+    public void updateTokenSuppliesAndPrices(Map<String, Token> tokenMap) {
 
-        BancorPricing pricer = new BancorPricing(tokenSupplies);
+        BancorPricing pricer = new BancorPricing(tokenMap);
 
-        for (String token : tokenSupplies.keySet()) {
-            if (token.equals("connector")) {
+        for (String token : tokenMap.keySet()) {
+            if (token.equals("Cash")) {
                 continue;
             }
 
-            String updateTokenSupplyQuery = "UPDATE tokens SET Supply=" + tokenSupplies.get(token) +
+            String updateTokenSupplyQuery = "UPDATE tokens SET TokenSupply=" + tokenMap.get(token).getTokenSupply() +
+                    " WHERE Name='" + token + "'";
+
+            String updateTokenCashSupplyQuery = "UPDATE tokens SET CashSupply=" + tokenMap.get(token).getCashSupply() +
                     " WHERE Name='" + token + "'";
 
             String updateTokenPriceQuery = "UPDATE tokens SET Price=" + pricer.calculatePrice(token) +
@@ -43,6 +47,7 @@ public class DataUpdater {
             try {
                 Statement statement = connection.createStatement();
                 statement.executeUpdate(updateTokenSupplyQuery);
+                statement.executeUpdate(updateTokenCashSupplyQuery);
                 statement.executeUpdate(updateTokenPriceQuery);
             } catch (SQLException e) {
                 e.printStackTrace();

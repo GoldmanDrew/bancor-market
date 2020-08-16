@@ -1,6 +1,7 @@
 package storage;
 
-import order.Order;
+import data.Order;
+import data.Token;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -24,15 +25,15 @@ public class DataFetcher {
      * and puts the results into a Map
      * @return A map from token name to token supply
      */
-    public Map<String, Double> retrieveTokenSupplies() {
-        Map<String, Double> tokenSupplyMap = new HashMap<>();
+    public Map<String, Token> retrieveTokens() {
+        Map<String, Token> tokenSupplyMap = new HashMap<>();
         try {
             Statement statement = connection.createStatement();
-            String tokenSupplyQuery = "SELECT Name, Supply from tokens";
+            String tokenSupplyQuery = "SELECT * from tokens";
             ResultSet resultSet = statement.executeQuery(tokenSupplyQuery);
 
             while (resultSet.next()) {
-                tokenSupplyMap.put(resultSet.getString("Name"), resultSet.getDouble("Supply"));
+                tokenSupplyMap.put(resultSet.getString("Name"), parseTokenQueryIntoToken(resultSet));
             }
 
             return tokenSupplyMap;
@@ -40,6 +41,21 @@ public class DataFetcher {
             e.printStackTrace();
         }
 
+        return null;
+    }
+
+    private Token parseTokenQueryIntoToken(ResultSet resultSet) {
+        try {
+            return new Token(
+                    resultSet.getString("Name"),
+                    resultSet.getString("Ticker"),
+                    resultSet.getDouble("TokenSupply"),
+                    resultSet.getDouble("CashSupply"),
+                    resultSet.getDouble("Price")
+            );
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
