@@ -39,6 +39,12 @@ public class MarketController {
         }
 
         dataUpdater.updateFilledOrders(lastOrderIdExecuted);
-        dataUpdater.updateTokenSuppliesAndPrices(pricer.getTokenMap());
+
+        for (String token : pricer.getTokenMap().keySet()) {
+            if (!token.equals("Cash")) {
+                dataUpdater.updateTokenSupplyAndPrice(pricer.getTokenMap().get(token));
+            }
+        }
+
     }
 }
