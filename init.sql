@@ -7,7 +7,8 @@ CREATE TABLE tokens (
 	Ticker varchar(4), 
 	TokenSupply DOUBLE, 
 	CashSupply DOUBLE,
-	Price DOUBLE
+	Price DOUBLE,
+	TimeUpdated DATETIME
 );
 
 CREATE TABLE UserShares (
@@ -27,6 +28,7 @@ CREATE TABLE orders (
 	TargetToken varchar(255), 
 	Quantity DOUBLE,
 	Filled varchar(1) NOT NULL,
+	OrderTime DATETIME,
 	PRIMARY KEY (OrderID),
 	FOREIGN KEY (SourceToken) REFERENCES tokens(Name),	
 	FOREIGN KEY (TargetToken) REFERENCES tokens(Name)

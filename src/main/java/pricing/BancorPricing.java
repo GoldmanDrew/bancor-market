@@ -16,7 +16,7 @@ public class BancorPricing {
         this.tokenMap = tokenMap;
     }
 
-    private static double calculatePrice(double connectorBalance, double smartTokenSupply, double connectionWeight) {
+    public static double calculatePrice(double connectorBalance, double smartTokenSupply, double connectionWeight) {
         return (connectorBalance) / (smartTokenSupply * connectionWeight);
     }
 

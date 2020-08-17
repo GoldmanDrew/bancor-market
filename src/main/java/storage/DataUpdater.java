@@ -2,11 +2,17 @@ package storage;
 
 import data.Order;
 import data.Token;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 import pricing.BancorPricing;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Map;
 
 public class DataUpdater {
@@ -26,33 +32,29 @@ public class DataUpdater {
         }
     }
 
-    public void updateTokenSuppliesAndPrices(Map<String, Token> tokenMap) {
+    public void updateTokenSupplyAndPrice(Token token) {
 
-        BancorPricing pricer = new BancorPricing(tokenMap);
+        Double price = BancorPricing.calculatePrice(token.getCashSupply(), token.getTokenSupply(), 0.5);
 
-        for (String token : tokenMap.keySet()) {
-            if (token.equals("Cash")) {
-                continue;
-            }
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String currentTime = format.format(LocalDateTime.now(ZoneOffset.UTC));
 
-            String updateTokenSupplyQuery = "UPDATE tokens SET TokenSupply=" + tokenMap.get(token).getTokenSupply() +
-                    " WHERE Name='" + token + "'";
+        String updateTokenQuery = "UPDATE tokens SET" +
+                " TokenSupply=" + token.getTokenSupply() +
+                ", CashSupply=" + token.getCashSupply() +
+                ", Price=" + price +
+                ", TimeUpdated='" + currentTime + "'" +
+                " WHERE Name='" + token.getTokenName() + "'";
 
-            String updateTokenCashSupplyQuery = "UPDATE tokens SET CashSupply=" + tokenMap.get(token).getCashSupply() +
-                    " WHERE Name='" + token + "'";
+        System.out.println(updateTokenQuery);
 
-            String updateTokenPriceQuery = "UPDATE tokens SET Price=" + pricer.calculatePrice(token) +
-                    " WHERE Name='" + token + "'";
-
-            try {
-                Statement statement = connection.createStatement();
-                statement.executeUpdate(updateTokenSupplyQuery);
-                statement.executeUpdate(updateTokenCashSupplyQuery);
-                statement.executeUpdate(updateTokenPriceQuery);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+        try {
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(updateTokenQuery);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+
     }
 
     public void updateUserShares(Order order, Double targetTokensIssued) {
