@@ -20,6 +20,22 @@ public class DataFetcher {
         this.connection = connection;
     }
 
+    public Double retrieveUserTokenQuantity(String user, String token) {
+        try {
+            Statement statement = connection.createStatement();
+            String userTokenSupplyQuery = String.format("SELECT Quantity from UserShares WHERE User='%s' AND Token='%s'",
+                    user, token);
+
+            ResultSet resultSet = statement.executeQuery(userTokenSupplyQuery);
+            if (resultSet.next()) {
+                return resultSet.getDouble("Quantity");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
+
     /**
      * Retrieves the supply for each token in the "tokens" table in MySQl
      * and puts the results into a Map

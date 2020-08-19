@@ -17,8 +17,8 @@ public class DataUpdater {
 
     public DataUpdater(Connection connection) { this.connection = connection; }
 
-    public void updateFilledOrders(Integer lastOrderID) {
-        String updateFilledOrdersQuery= "UPDATE orders SET Filled = 'Y' where OrderID<=" + lastOrderID;
+    public void updateOrderFilledStatus(Integer lastOrderID, String status) {
+        String updateFilledOrdersQuery= String.format("UPDATE orders SET Filled = '%s' where OrderID=%d", status, lastOrderID);
 
         try {
             Statement statement = connection.createStatement();

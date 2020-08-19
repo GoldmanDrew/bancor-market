@@ -27,18 +27,20 @@ public class MarketController {
         List<Order> orders = dataFetcher.retrieveAllOrders();
 
         for (Order order : orders) {
-            double tokensIssued = pricer.exchangeTokens(order.getSourceToken(), order.getTargetToken(), order.getSourceQuantity(), order.getTargetQuantity(), order.getUser());
-            // Round to two decimals
-            tokensIssued = Math.round(tokensIssued * 100.0) / 100.0;
+            Double tokensIssued = pricer.exchangeTokens(order.getSourceToken(), order.getTargetToken(), order.getSourceQuantity(), order.getTargetQuantity(), order.getUser());
 
-            if (order.getOrderId() > lastOrderIdExecuted) {
-                lastOrderIdExecuted = order.getOrderId();
+            // Order was not stopped
+            if (tokensIssued != null) {
+                // Round to two decimals
+                tokensIssued = Math.round(tokensIssued * 100.0) / 100.0;
+
+                dataUpdater.updateUserShares(order, tokensIssued);
+                dataUpdater.updateOrderFilledStatus(order.getOrderId(), "Y");
+            } else {
+                dataUpdater.updateOrderFilledStatus(order.getOrderId(), "C");
             }
 
-            dataUpdater.updateUserShares(order, tokensIssued);
         }
-
-        dataUpdater.updateFilledOrders(lastOrderIdExecuted);
 
         for (String token : pricer.getTokenMap().keySet()) {
             if (!token.equals("Cash")) {

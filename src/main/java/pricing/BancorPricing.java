@@ -16,15 +16,24 @@ public class BancorPricing {
         this.tokenMap = tokenMap;
     }
 
+    /**
+     * Calculates the price of a token
+     */
     public static double calculatePrice(double connectorBalance, double smartTokenSupply, double connectionWeight) {
         return (connectorBalance) / (smartTokenSupply * connectionWeight);
     }
 
+    /**
+     * Calculates the number of Smart Tokens issued OR the number of Smart Tokens needed
+     */
     private static double calculateSmartTokensIssued(double smartTokenSupply, double connectorTokensPaid, double connectorBalance,
                                                     double connectorWeight) {
         return smartTokenSupply * (Math.pow(1.0 + (connectorTokensPaid / connectorBalance), connectorWeight) - 1);
     }
 
+    /**
+     * Calculates the number of Connector Tokens issued OR the number of Connector Tokens needed
+     */
     private static double calculateConnectorTokensIssued(double connectorBalance, double smartTokensPaid, double smartTokenSupply,
                                                         double connectorWeight) {
         return connectorBalance * (Math.pow(1 + (smartTokensPaid / smartTokenSupply), (1 / connectorWeight)) - 1);
@@ -36,7 +45,7 @@ public class BancorPricing {
 
     public Double exchangeTokens(String sourceToken, String targetToken, Double sourceQuantity, Double targetQuantity, String user) {
         if (sourceQuantity != null) {
-            return exchangeTokensWithSourceQuantityFunding(sourceToken, targetToken, sourceQuantity);
+            return exchangeTokensWithSourceQuantityFunding(sourceToken, targetToken, sourceQuantity, user);
         }
         else if (targetQuantity != null) {
             return exchangeTokensWithTargetQuantity(sourceToken, targetToken, targetQuantity, user);
@@ -85,11 +94,16 @@ public class BancorPricing {
      * Exchanges tokens where the source quantity is known and the target quantity must be solved for
      * Example: Buy $10 of token A
      * @param sourceToken - The originating token that the user is using for funding
-     * @param targetToken - The token the user recieves from the order
+     * @param targetToken - The token the user receives from the order
      * @param sourceQuantity - The number of sourceTokens the user is using to fund the order
      * @return The number of targetTokens issued for this order
      */
-    private double exchangeTokensWithSourceQuantityFunding(String sourceToken, String targetToken, double sourceQuantity) {
+    private Double exchangeTokensWithSourceQuantityFunding(String sourceToken, String targetToken, double sourceQuantity, String user) {
+
+        // User does not have enough of sourceToken to fund this purchase
+        if (!OrderValidator.validateUserHasSourceTokens(user, sourceToken, sourceQuantity)) {
+            return null;
+        }
 
         // Sell a set quantity of tokens into cash
         if (targetToken.equals(CONNECTOR_TOKEN_NAME)) {
@@ -111,12 +125,8 @@ public class BancorPricing {
 
         // Sell a set quantity of a token into cash to then buy another token
         else {
-            double connectorTokensIssued = exchangeTokensWithSourceQuantityFunding(sourceToken, CONNECTOR_TOKEN_NAME, sourceQuantity);
-            return exchangeTokensWithSourceQuantityFunding(CONNECTOR_TOKEN_NAME, targetToken, sourceQuantity);
+            double connectorTokensIssued = exchangeTokensWithSourceQuantityFunding(sourceToken, CONNECTOR_TOKEN_NAME, sourceQuantity, user);
+            return exchangeTokensWithSourceQuantityFunding(CONNECTOR_TOKEN_NAME, targetToken, sourceQuantity, user);
         }
-    }
-
-    public double calculatePrice(String token) {
-        return calculatePrice(tokenMap.get(token).getCashSupply(), tokenMap.get(token).getTokenSupply(), CONNECTOR_WEIGHT);
     }
 }
