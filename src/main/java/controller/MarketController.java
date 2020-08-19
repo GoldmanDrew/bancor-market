@@ -27,7 +27,7 @@ public class MarketController {
         List<Order> orders = dataFetcher.retrieveAllOrders();
 
         for (Order order : orders) {
-            double tokensIssued = pricer.exchangeTokens(order.getSourceToken(), order.getTargetToken(), order.getQuantity());
+            double tokensIssued = pricer.exchangeTokens(order.getSourceToken(), order.getTargetToken(), order.getSourceQuantity(), order.getTargetQuantity(), order.getUser());
             // Round to two decimals
             tokensIssued = Math.round(tokensIssued * 100.0) / 100.0;
 

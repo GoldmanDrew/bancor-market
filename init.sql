@@ -1,6 +1,6 @@
-CREATE DATABASE IF NOT EXISTS vase2;
+CREATE DATABASE IF NOT EXISTS unibursal;
 
-USE vase2;
+USE unibursal;
 
 CREATE TABLE tokens (
 	Name varchar(255) PRIMARY KEY,
@@ -26,12 +26,14 @@ CREATE TABLE orders (
 	User varchar(255), 
 	SourceToken varchar(255), 
 	TargetToken varchar(255), 
-	Quantity DOUBLE,
+	SourceQuantity DOUBLE,
+	TargetQuantity DOUBLE,
 	Filled varchar(1) NOT NULL,
 	OrderTime DATETIME,
 	PRIMARY KEY (OrderID),
 	FOREIGN KEY (SourceToken) REFERENCES tokens(Name),	
-	FOREIGN KEY (TargetToken) REFERENCES tokens(Name)
+	FOREIGN KEY (TargetToken) REFERENCES tokens(Name),
+	CONSTRAINT checkQuantity CHECK ((SourceQuantity IS NOT NULL OR TargetQuantity IS NOT NULL) AND (SourceQuantity IS NULL OR TargetQuantity IS NULL))
 );
 
 INSERT INTO tokens (Name, Ticker, Price) VALUES ("Cash", "Cash", 1.0);

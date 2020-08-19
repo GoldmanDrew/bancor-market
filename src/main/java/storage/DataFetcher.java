@@ -93,7 +93,8 @@ public class DataFetcher {
                     resultSet.getString("User"),
                     resultSet.getString("SourceToken"),
                     resultSet.getString("TargetToken"),
-                    resultSet.getDouble("Quantity")
+                    resultSet.getObject("SourceQuantity") != null ? resultSet.getDouble("SourceQuantity") : null,
+                    resultSet.getObject("TargetQuantity") != null ? resultSet.getDouble("TargetQuantity") : null
             );
         } catch (SQLException e) {
             e.printStackTrace();

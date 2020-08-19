@@ -2,18 +2,14 @@ package storage;
 
 import data.Order;
 import data.Token;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 import pricing.BancorPricing;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.Map;
 
 public class DataUpdater {
 
@@ -46,8 +42,6 @@ public class DataUpdater {
                 ", TimeUpdated='" + currentTime + "'" +
                 " WHERE Name='" + token.getTokenName() + "'";
 
-        System.out.println(updateTokenQuery);
-
         try {
             Statement statement = connection.createStatement();
             statement.executeUpdate(updateTokenQuery);
@@ -57,12 +51,23 @@ public class DataUpdater {
 
     }
 
-    public void updateUserShares(Order order, Double targetTokensIssued) {
-        String updateSourceTokenQuery = String.format("UPDATE UserShares SET Quantity=Quantity - %f WHERE User='%s' AND Token='%s'",
-                order.getQuantity(), order.getUser(), order.getSourceToken());
+    public void updateUserShares(Order order, Double tokensIssued) {
+        String updateSourceTokenQuery;
+        String updateTargetTokenQuery;
+        if (order.getSourceQuantity() != null) {
+            updateSourceTokenQuery = String.format("UPDATE UserShares SET Quantity=Quantity - %f WHERE User='%s' AND Token='%s'",
+                    order.getSourceQuantity(), order.getUser(), order.getSourceToken());
 
-        String updateTargetTokenQuery = String.format("INSERT INTO UserShares (User, Token, Quantity) VALUES ('%s', '%s', '%f') " +
-                "ON DUPLICATE KEY UPDATE Quantity=Quantity + %f", order.getUser(), order.getTargetToken(), targetTokensIssued, targetTokensIssued);
+            updateTargetTokenQuery = String.format("INSERT INTO UserShares (User, Token, Quantity) VALUES ('%s', '%s', '%f') " +
+                    "ON DUPLICATE KEY UPDATE Quantity=Quantity + %f", order.getUser(), order.getTargetToken(), tokensIssued, tokensIssued);
+        }
+        else {
+            updateSourceTokenQuery = String.format("UPDATE UserShares SET Quantity=Quantity - %f WHERE User='%s' AND Token='%s'",
+                    order.getSourceQuantity(), order.getUser(), tokensIssued);
+
+            updateTargetTokenQuery = String.format("INSERT INTO UserShares (User, Token, Quantity) VALUES ('%s', '%s', '%f') " +
+                    "ON DUPLICATE KEY UPDATE Quantity=Quantity + %f", order.getUser(), order.getTargetToken(), order.getTargetQuantity(), order.getTargetQuantity());
+        }
 
         try {
             Statement statement = connection.createStatement();
