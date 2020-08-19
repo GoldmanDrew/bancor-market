@@ -12,4 +12,4 @@ password = MySQLPassword
 Use init.sql to initalize the MySQL database
 
 ### Testing
-Use test.sql to insert dummy values into MySQL, then run using an IDE or `gradle run` from a command line
+Use insert.sql to insert dummy values into MySQL, then run using an IDE or `gradle run` from a command line
