@@ -10,7 +10,7 @@ public class OrderValidator {
         OrderValidator.dataFetcher = dataFetcher;
     }
 
-    public static boolean validateUserHasSourceTokens(String user, String sourceToken, Double sourceQuantity) {
-        return sourceQuantity <= dataFetcher.retrieveUserTokenQuantity(user, sourceToken);
+    public static boolean validateUserHasTokens(String user, String token, Double quantity) {
+        return quantity <= dataFetcher.retrieveUserTokenQuantity(user, token);
     }
 }

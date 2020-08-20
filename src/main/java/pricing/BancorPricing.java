@@ -10,7 +10,7 @@ public class BancorPricing {
     @Getter
     private Map<String, Token> tokenMap;
     private final String CONNECTOR_TOKEN_NAME = "Cash";
-    private final double CONNECTOR_WEIGHT = .5;
+    private final Double CONNECTOR_WEIGHT = .5;
 
     public BancorPricing(Map<String, Token> tokenMap) {
         this.tokenMap = tokenMap;
@@ -19,14 +19,14 @@ public class BancorPricing {
     /**
      * Calculates the price of a token
      */
-    public static double calculatePrice(double connectorBalance, double smartTokenSupply, double connectionWeight) {
+    public static Double calculatePrice(double connectorBalance, double smartTokenSupply, double connectionWeight) {
         return (connectorBalance) / (smartTokenSupply * connectionWeight);
     }
 
     /**
      * Calculates the number of Smart Tokens issued OR the number of Smart Tokens needed
      */
-    private static double calculateSmartTokensIssued(double smartTokenSupply, double connectorTokensPaid, double connectorBalance,
+    private static Double calculateSmartTokensIssued(double smartTokenSupply, double connectorTokensPaid, double connectorBalance,
                                                     double connectorWeight) {
         return smartTokenSupply * (Math.pow(1.0 + (connectorTokensPaid / connectorBalance), connectorWeight) - 1);
     }
@@ -34,12 +34,12 @@ public class BancorPricing {
     /**
      * Calculates the number of Connector Tokens issued OR the number of Connector Tokens needed
      */
-    private static double calculateConnectorTokensIssued(double connectorBalance, double smartTokensPaid, double smartTokenSupply,
+    private static Double calculateConnectorTokensIssued(double connectorBalance, double smartTokensPaid, double smartTokenSupply,
                                                         double connectorWeight) {
         return connectorBalance * (Math.pow(1 + (smartTokensPaid / smartTokenSupply), (1 / connectorWeight)) - 1);
     }
 
-    private static double calculateEffectivePrice(double connectorTokensExchanged, double smartTokensExchanged) {
+    private static Double calculateEffectivePrice(double connectorTokensExchanged, double smartTokensExchanged) {
         return connectorTokensExchanged / smartTokensExchanged;
     }
 
@@ -62,21 +62,29 @@ public class BancorPricing {
      * @param user - The user that placed the order
      * @return The number of sourceTokens needed to fund this order
      */
-    private double exchangeTokensWithTargetQuantity(String sourceToken, String targetToken, Double targetQuantity, String user) {
+    private Double exchangeTokensWithTargetQuantity(String sourceToken, String targetToken, Double targetQuantity, String user) {
 
         // Sell specific cash amount of a token
         if (targetToken.equals(CONNECTOR_TOKEN_NAME)) {
             double sourceTokensNeeded = calculateSmartTokensIssued(tokenMap.get(sourceToken).getTokenSupply(), targetQuantity, tokenMap.get(sourceToken).getCashSupply(), CONNECTOR_WEIGHT);
+
+            if (!OrderValidator.validateUserHasTokens(user, sourceToken, sourceTokensNeeded)) {
+                return null;
+            }
+
             tokenMap.get(sourceToken).updateCashSupply(-1 * targetQuantity);
-            // TODO - Check user has sourceTokensNeeded
-            tokenMap.get(sourceToken).updateCashSupply(-1 * sourceTokensNeeded);
+            tokenMap.get(sourceToken).updateTokenSupply(-1 * sourceTokensNeeded);
             return sourceTokensNeeded;
         }
 
         // Buy a specific amount of a token using cash
         if (sourceToken.equals(CONNECTOR_TOKEN_NAME)) {
             double connectorTokensNeeded = calculateConnectorTokensIssued(tokenMap.get(targetToken).getCashSupply(), targetQuantity, tokenMap.get(targetToken).getTokenSupply(), CONNECTOR_WEIGHT);
-            // TODO - Check user has connecorTokensNeeded
+
+            if (!OrderValidator.validateUserHasTokens(user, sourceToken, connectorTokensNeeded)) {
+                return null;
+            }
+
             tokenMap.get(targetToken).updateCashSupply(connectorTokensNeeded);
             tokenMap.get(targetToken).updateTokenSupply(targetQuantity);
             return connectorTokensNeeded;
@@ -84,9 +92,19 @@ public class BancorPricing {
 
         // Buy a specific amount of a token using another token as funding
         else {
-            // TODO - First calculate the number of source tokens needed since the cash may not be there until the source tokens are sold
-            double connectorTokensNeeded = exchangeTokensWithTargetQuantity(CONNECTOR_TOKEN_NAME, targetToken, targetQuantity, user);
-            return exchangeTokensWithTargetQuantity(sourceToken, CONNECTOR_TOKEN_NAME, connectorTokensNeeded, user);
+            Double connectorTokensNeeded = calculateConnectorTokensIssued(tokenMap.get(targetToken).getCashSupply(), targetQuantity, tokenMap.get(targetToken).getTokenSupply(), CONNECTOR_WEIGHT);
+            Double sourceTokensNeeded = calculateSmartTokensIssued(tokenMap.get(sourceToken).getTokenSupply(), connectorTokensNeeded, tokenMap.get(sourceToken).getCashSupply(), CONNECTOR_WEIGHT);
+
+            if (!OrderValidator.validateUserHasTokens(user, sourceToken, sourceTokensNeeded)) {
+                return null;
+            }
+
+            tokenMap.get(sourceToken).updateTokenSupply(-1 * sourceTokensNeeded);
+            tokenMap.get(sourceToken).updateCashSupply(-1 * connectorTokensNeeded);
+            tokenMap.get(targetToken).updateTokenSupply(sourceTokensNeeded);
+            tokenMap.get(targetToken).updateCashSupply(connectorTokensNeeded);
+
+            return sourceTokensNeeded;
         }
     }
 
@@ -101,7 +119,7 @@ public class BancorPricing {
     private Double exchangeTokensWithSourceQuantityFunding(String sourceToken, String targetToken, double sourceQuantity, String user) {
 
         // User does not have enough of sourceToken to fund this purchase
-        if (!OrderValidator.validateUserHasSourceTokens(user, sourceToken, sourceQuantity)) {
+        if (!OrderValidator.validateUserHasTokens(user, sourceToken, sourceQuantity)) {
             return null;
         }
 
@@ -125,8 +143,13 @@ public class BancorPricing {
 
         // Sell a set quantity of a token into cash to then buy another token
         else {
-            double connectorTokensIssued = exchangeTokensWithSourceQuantityFunding(sourceToken, CONNECTOR_TOKEN_NAME, sourceQuantity, user);
-            return exchangeTokensWithSourceQuantityFunding(CONNECTOR_TOKEN_NAME, targetToken, sourceQuantity, user);
+            Double connectorTokensIssued = exchangeTokensWithSourceQuantityFunding(sourceToken, CONNECTOR_TOKEN_NAME, sourceQuantity, user);
+            double smartTokensIssued = calculateSmartTokensIssued(tokenMap.get(targetToken).getTokenSupply(), connectorTokensIssued, tokenMap.get(targetToken).getCashSupply(), CONNECTOR_WEIGHT);
+
+            tokenMap.get(targetToken).updateTokenSupply(smartTokensIssued);
+            tokenMap.get(targetToken).updateCashSupply(sourceQuantity);
+
+            return smartTokensIssued;
         }
     }
 }
