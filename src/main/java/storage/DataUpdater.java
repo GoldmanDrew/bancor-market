@@ -63,7 +63,7 @@ public class DataUpdater {
         }
         else {
             updateSourceTokenQuery = String.format("UPDATE UserShares SET Quantity=Quantity - %f WHERE User='%s' AND Token='%s'",
-                    order.getSourceQuantity(), order.getUser(), tokensIssued);
+                    tokensIssued, order.getUser(), order.getSourceToken());
 
             updateTargetTokenQuery = String.format("INSERT INTO UserShares (User, Token, Quantity) VALUES ('%s', '%s', '%f') " +
                     "ON DUPLICATE KEY UPDATE Quantity=Quantity + %f", order.getUser(), order.getTargetToken(), order.getTargetQuantity(), order.getTargetQuantity());
