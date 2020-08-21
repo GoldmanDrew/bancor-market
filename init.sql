@@ -13,6 +13,7 @@ CREATE TABLE tokens (
 
 CREATE TABLE UserShares (
 	ID int AUTO_INCREMENT,
+	-- Will need to reference the Django table with users
 	User varchar(255),
 	Token varchar(255),
 	Quantity DOUBLE, 
@@ -23,6 +24,7 @@ CREATE TABLE UserShares (
 
 CREATE TABLE orders (
 	OrderID int AUTO_INCREMENT, 
+	-- Will need to reference the Django table with users
 	User varchar(255), 
 	SourceToken varchar(255), 
 	TargetToken varchar(255), 
@@ -34,6 +36,15 @@ CREATE TABLE orders (
 	FOREIGN KEY (SourceToken) REFERENCES tokens(Name),	
 	FOREIGN KEY (TargetToken) REFERENCES tokens(Name),
 	CONSTRAINT checkQuantity CHECK ((SourceQuantity IS NOT NULL OR TargetQuantity IS NOT NULL) AND (SourceQuantity IS NULL OR TargetQuantity IS NULL))
+);
+
+CREATE TABLE tokenHistory (
+	ID int AUTO_INCREMENT,
+	Token varchar(255), 
+	Time DATETIME, 
+	Price DOUBLE,
+	PRIMARY KEY (ID), 
+	FOREIGN KEY (TOKEN) REFERENCES tokens(Name)
 );
 
 INSERT INTO tokens (Name, Ticker, Price) VALUES ("Cash", "Cash", 1.0);
