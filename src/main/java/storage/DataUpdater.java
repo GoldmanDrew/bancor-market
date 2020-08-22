@@ -42,9 +42,13 @@ public class DataUpdater {
                 ", TimeUpdated='" + currentTime + "'" +
                 " WHERE Name='" + token.getTokenName() + "'";
 
+        String insertTokenHistoryPrice = String.format("INSERT INTO tokenHistory (Token, Time, Price) VALUES ('%s', '%s', %f)",
+                token.getTokenName(), currentTime, price);
+
         try {
             Statement statement = connection.createStatement();
             statement.executeUpdate(updateTokenQuery);
+            statement.executeUpdate(insertTokenHistoryPrice);
         } catch (SQLException e) {
             e.printStackTrace();
         }
