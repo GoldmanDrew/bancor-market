@@ -31,7 +31,7 @@ CREATE TABLE orders (
 	SourceQuantity DOUBLE,
 	TargetQuantity DOUBLE,
 	Filled varchar(1) NOT NULL,
-	OrderTime DATETIME,
+	OrderTime DATETIME DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (OrderID),
 	FOREIGN KEY (SourceToken) REFERENCES tokens(Name),	
 	FOREIGN KEY (TargetToken) REFERENCES tokens(Name),

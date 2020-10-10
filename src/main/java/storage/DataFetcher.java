@@ -27,7 +27,7 @@ public class DataFetcher {
                     user, token);
 
             ResultSet resultSet = statement.executeQuery(userTokenSupplyQuery);
-            if (resultSet.next()) {
+            if (resultSet.next()) { // if there are no table rows that means that the user does not have that token
                 return resultSet.getDouble("Quantity");
             }
         } catch (SQLException e) {
@@ -37,7 +37,7 @@ public class DataFetcher {
     }
 
     /**
-     * Retrieves the supply for each token in the "tokens" table in MySQl
+     * Retrieves the supply for each token in the "tokens" table in MySQL
      * and puts the results into a Map
      * @return A map from token name to token supply
      */

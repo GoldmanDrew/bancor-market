@@ -30,11 +30,10 @@ public class DataUpdater {
 
     public void updateTokenSupplyAndPrice(Token token) {
 
-        Double price = BancorPricing.calculatePrice(token.getCashSupply(), token.getTokenSupply(), 0.5);
+        Double price = BancorPricing.calculatePrice(token.getCashSupply(), token.getTokenSupply(), BancorPricing.getCONNECTOR_WEIGHT());    //TODO: connector weight 0.5 should not be hardcoded
 
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String currentTime = format.format(LocalDateTime.now(ZoneOffset.UTC));
-
         String updateTokenQuery = "UPDATE tokens SET" +
                 " TokenSupply=" + token.getTokenSupply() +
                 ", CashSupply=" + token.getCashSupply() +
@@ -60,8 +59,7 @@ public class DataUpdater {
         String updateTargetTokenQuery;
         if (order.getSourceQuantity() != null) {
             updateSourceTokenQuery = String.format("UPDATE UserShares SET Quantity=Quantity - %f WHERE User='%s' AND Token='%s'",
-                    order.getSourceQuantity(), order.getUser(), order.getSourceToken());
-
+                order.getSourceQuantity(), order.getUser(), order.getSourceToken());
             updateTargetTokenQuery = String.format("INSERT INTO UserShares (User, Token, Quantity) VALUES ('%s', '%s', '%f') " +
                     "ON DUPLICATE KEY UPDATE Quantity=Quantity + %f", order.getUser(), order.getTargetToken(), tokensIssued, tokensIssued);
         }

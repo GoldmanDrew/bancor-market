@@ -10,10 +10,14 @@ public class BancorPricing {
     @Getter
     private Map<String, Token> tokenMap;
     private final String CONNECTOR_TOKEN_NAME = "Cash";
-    private final Double CONNECTOR_WEIGHT = .5;
+    private static final Double CONNECTOR_WEIGHT = .5;
 
     public BancorPricing(Map<String, Token> tokenMap) {
         this.tokenMap = tokenMap;
+    }
+
+    public static Double getCONNECTOR_WEIGHT() {
+        return CONNECTOR_WEIGHT;
     }
 
     /**
@@ -44,10 +48,14 @@ public class BancorPricing {
     }
 
     public Double exchangeTokens(String sourceToken, String targetToken, Double sourceQuantity, Double targetQuantity, String user) {
+        // if you know how much you're paying/how many tokens you're selling but not how much you're getting back
+            // this should really be used for just selling
         if (sourceQuantity != null) {
             return exchangeTokensWithSourceQuantityFunding(sourceToken, targetToken, sourceQuantity, user);
         }
-        else if (targetQuantity != null) {
+        else if (targetQuantity != null) { 
+        // if you know how much you want to buy or how much you're selling for
+            // this should really be used for just buying
             return exchangeTokensWithTargetQuantity(sourceToken, targetToken, targetQuantity, user);
         }
         return null;
@@ -64,7 +72,7 @@ public class BancorPricing {
      */
     private Double exchangeTokensWithTargetQuantity(String sourceToken, String targetToken, Double targetQuantity, String user) {
 
-        // Sell specific cash amount of a token
+        // Sell specific cash amount of a token     //TODO: test this
         if (targetToken.equals(CONNECTOR_TOKEN_NAME)) {
             double sourceTokensNeeded = calculateSmartTokensIssued(tokenMap.get(sourceToken).getTokenSupply(), targetQuantity, tokenMap.get(sourceToken).getCashSupply(), CONNECTOR_WEIGHT);
 
@@ -90,7 +98,7 @@ public class BancorPricing {
             return connectorTokensNeeded;
         }
 
-        // Buy a specific amount of a token using another token as funding
+        // Buy a specific amount of a token using another token as funding //TODO: test this
         else {
             Double connectorTokensNeeded = calculateConnectorTokensIssued(tokenMap.get(targetToken).getCashSupply(), targetQuantity, tokenMap.get(targetToken).getTokenSupply(), CONNECTOR_WEIGHT);
             Double sourceTokensNeeded = calculateSmartTokensIssued(tokenMap.get(sourceToken).getTokenSupply(), connectorTokensNeeded, tokenMap.get(sourceToken).getCashSupply(), CONNECTOR_WEIGHT);
@@ -125,14 +133,14 @@ public class BancorPricing {
 
         // Sell a set quantity of tokens into cash
         if (targetToken.equals(CONNECTOR_TOKEN_NAME)) {
-            double connectorTokensIssued = calculateConnectorTokensIssued(tokenMap.get(sourceToken).getCashSupply(), sourceQuantity, tokenMap.get(sourceToken).getTokenSupply(), CONNECTOR_WEIGHT);
-            tokenMap.get(sourceToken).updateTokenSupply(-1 * sourceQuantity);
-            tokenMap.get(sourceToken).updateCashSupply(-1 * connectorTokensIssued);
+            double connectorTokensIssued = -1 * calculateConnectorTokensIssued(tokenMap.get(sourceToken).getCashSupply(), -1 * sourceQuantity, tokenMap.get(sourceToken).getTokenSupply(), CONNECTOR_WEIGHT);
+            tokenMap.get(sourceToken).updateTokenSupply(-1 * sourceQuantity); // destroying tokens
+            tokenMap.get(sourceToken).updateCashSupply(-1 * connectorTokensIssued); // paying out cash
 
             return connectorTokensIssued;
         }
 
-        // Buy a token using a set quantity cash
+        // Buy a token using a set quantity cash   //TODO: test this
         if (sourceToken.equals(CONNECTOR_TOKEN_NAME)) {
             double smartTokensIssued = calculateSmartTokensIssued(tokenMap.get(targetToken).getTokenSupply(), sourceQuantity, tokenMap.get(targetToken).getCashSupply(), CONNECTOR_WEIGHT);
             tokenMap.get(targetToken).updateTokenSupply(smartTokensIssued);
@@ -141,7 +149,7 @@ public class BancorPricing {
             return smartTokensIssued;
         }
 
-        // Sell a set quantity of a token into cash to then buy another token
+        // Sell a set quantity of a token into cash to then buy another token //TODO: test this
         else {
             Double connectorTokensIssued = exchangeTokensWithSourceQuantityFunding(sourceToken, CONNECTOR_TOKEN_NAME, sourceQuantity, user);
             double smartTokensIssued = calculateSmartTokensIssued(tokenMap.get(targetToken).getTokenSupply(), connectorTokensIssued, tokenMap.get(targetToken).getCashSupply(), CONNECTOR_WEIGHT);
